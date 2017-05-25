@@ -95,6 +95,14 @@ func GetMainBranch() string {
 	return getConfigurationValue("git-town.main-branch-name")
 }
 
+// GetOfflineMode returns whether we are in offline mode
+func GetOfflineMode() bool {
+	if getConfigurationValue("git-town.offline-mode") == "1" {
+		return true
+	}
+	return false
+}
+
 // GetParentBranch returns the name of the parent branch of the given branch.
 func GetParentBranch(branchName string) string {
 	return getConfigurationValue("git-town-branch." + branchName + ".parent")

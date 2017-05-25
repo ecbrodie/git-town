@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Originate/git-town/src/git"
 	"github.com/Originate/git-town/src/prompt"
@@ -41,8 +42,12 @@ var hackCmd = &cobra.Command{
 
 func checkHackPreconditions(args []string) string {
 	targetBranchName := args[0]
-	if git.HasRemote("origin") {
+	if git.HasRemote("origin") && !git.GetOfflineMode() {
 		script.Fetch()
+	} else {
+		fmt.Println("XXX  OFFLINE MODE  XXX")
+		fmt.Println("skipping fetch")
+		fmt.Println("run 'git-town offline-mode off' to disable offline mode")
 	}
 	git.EnsureDoesNotHaveBranch(targetBranchName)
 	return targetBranchName
@@ -52,7 +57,7 @@ func getHackStepList(targetBranchName string) (result steps.StepList) {
 	mainBranchName := git.GetMainBranch()
 	result.AppendList(steps.GetSyncBranchSteps(mainBranchName))
 	result.Append(steps.CreateAndCheckoutBranchStep{BranchName: targetBranchName, ParentBranchName: mainBranchName})
-	if git.HasRemote("origin") && git.ShouldHackPush() {
+	if git.HasRemote("origin") && git.ShouldHackPush() && !git.GetOfflineMode() {
 		result.Append(steps.CreateTrackingBranchStep{BranchName: targetBranchName})
 	}
 	result.Wrap(steps.WrapOptions{RunInGitRoot: true, StashOpenChanges: true})
